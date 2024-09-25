@@ -1,7 +1,12 @@
-int Disasaembler8080Op(unsigned char *codebuffer, int pc) {
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+int Disassembler8080Op(unsigned char *codebuffer, int pc) {
     unsigned char *code = &codebuffer[pc];
     int opbytes = 1;
-    printf("%04x", pc);
+    printf("%04x ", pc);
     switch (*code) {
 
         case 0x00: printf("NOP"); break;
@@ -56,7 +61,7 @@ int Disasaembler8080Op(unsigned char *codebuffer, int pc) {
         case 0x2f: printf("CMA"); break;
 
         case 0x30: printf("NOP"); break;
-        case 0x31: printf("LSI    SP,#$%02x02x", code[2], code[1]); opbytes = 3; break;
+        case 0x31: printf("LXI    SP,#$%02x%02x", code[2], code[1]); opbytes = 3; break;
         case 0x32: printf("STA    $%02x%02x", code[2], code[1]); opbytes = 3; break;
         case 0x33: printf("INX    SP"); break;
         case 0x34: printf("INR    M"); break;
@@ -276,6 +281,34 @@ int Disasaembler8080Op(unsigned char *codebuffer, int pc) {
         case 0xfe: printf("CPI    #$%02x", code[1]); opbytes = 2; break;
         case 0xff: printf("RST    7"); break;
     }
-
+    printf("\n");
     return opbytes;
 }
+
+int main (int argc, char**argv)    
+   {    
+    FILE *f= fopen(argv[1], "rb");    
+    if (f==NULL)    
+    {    
+        printf("error: Couldn't open %s\n", argv[1]);    
+        exit(1);    
+    }    
+
+    fseek(f, 0L, SEEK_END);    
+    int fsize = ftell(f);    
+    fseek(f, 0L, SEEK_SET);    
+
+    unsigned char *buffer=malloc(fsize);    
+
+    fread(buffer, fsize, 1, f);    
+    fclose(f);    
+
+    int pc = 0;    
+
+    while (pc < fsize)    
+    {    
+        pc += Disassembler8080Op(buffer, pc);    
+    }    
+    free(buffer);
+    return 0;    
+   }
