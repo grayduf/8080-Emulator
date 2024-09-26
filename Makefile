@@ -4,7 +4,7 @@ CFLAGS=-g -std=c11 -Wall -Wshadow -Wvla -Werror -pedantic
 CFLAGS_GCOV=$(CFLAGS) -fprofile-arcs -ftest-coverage -dumpbase ''
 
 BASE_NAME=8080emu
-ROM_H=invaders.h
+ROM=invaders
 EXECUTABLE=$(BASE_NAME)
 EXECUTABLE_GCOV=$(EXECUTABLE)_gcov
 
@@ -21,8 +21,11 @@ SHELL=/bin/bash
 $(EXECUTABLE): $(SRC_C) #Compile the Executable
 	$(CC) -o $(EXECUTABLE) $(SRC_C) $(CFLAGS)
 
-test: $(EXECUTABLE) $(ROM_H) #run executable
-	./$(EXECUTABLE) $(ROM_H)
+test rom: $(EXECUTABLE) $(ROM) #run executable
+	./$(EXECUTABLE) $(ROM)
+
+test header: $(EXECUTABLE) $(ROM) #run executable
+	./$(EXECUTABLE) $(ROM).h
 
 gdb: $(EXECUTABLE) #run executable with valgrind
 	gdb ./$(EXECUTABLE)
