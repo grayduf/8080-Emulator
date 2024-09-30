@@ -7,6 +7,7 @@ BASE_NAME=8080emu
 ROM=invaders
 EXECUTABLE=$(BASE_NAME)
 EXECUTABLE_GCOV=$(EXECUTABLE)_gcov
+OUTPUT_TXT=output.txt
 
 SRC_C=$(BASE_NAME).c
 #TEST_C=test_$(SRC_C)
@@ -22,7 +23,7 @@ $(EXECUTABLE): $(SRC_C) #Compile the Executable
 	$(CC) -o $(EXECUTABLE) $(SRC_C) $(CFLAGS)
 
 test rom: $(EXECUTABLE) $(ROM) #run executable
-	./$(EXECUTABLE) $(ROM)
+	./$(EXECUTABLE) $(ROM) > $(OUTPUT_TXT)
 
 test header: $(EXECUTABLE) $(ROM) #run executable
 	./$(EXECUTABLE) $(ROM).h
@@ -36,7 +37,7 @@ gdb: $(EXECUTABLE) #run executable with valgrind
 #	gcov -f $(SRC_C)
 
 clean: #delete created output files
-	rm -f $(EXECUTABLE) $(EXECUTABLE_GCOV) *.gcda *.gcno *.gcov
+	rm -f $(EXECUTABLE) $(OUTPUT_TXT) $(EXECUTABLE_GCOV) *.gcda *.gcno *.gcov
 
 #submit: #submit files
 #	$(GIT_ADD) $(SUBMIT_FILES)
