@@ -27,7 +27,7 @@ typedef struct State8080 {
     uint8_t     int_enable;
 }   State8080;
 
-static int Partity(int x, int size) {
+static int Parity(int x, int size) {
     int i;
     int p = 0;
     x = (x & ((1<<size) - 1));
@@ -327,6 +327,12 @@ static void ArithFlags(State8080 *state, uint16_t ans) {
     state->cc.p = Parity(ans&0xff); 
 }
 
+static void FlagsZSP(State8080 *state, uint8_t val) {
+    state->cc.z = (val == 0);
+    state->cc.s = (0x80 == (val & 0x80));
+    state->cc.p = Parity(val, 8);
+}
+
 void UnimplementedInstruction(State8080* state) {
     printf("ERROR: Unimplemented instruction\n");
     state->pc--;
@@ -335,7 +341,7 @@ void UnimplementedInstruction(State8080* state) {
     exit(1);
 }
 
-int Emulate8080OpErr(State8080* state) {
+int Emulate8080Op(State8080* state) {
     unsigned char *opcode = &state->memory[state->pc];
     Disassembler8080Op(state->memory, state->pc);
 
@@ -481,14 +487,14 @@ int Emulate8080OpErr(State8080* state) {
         case 0x7e: UnimplementedInstruction(state); break;
         case 0x7f: UnimplementedInstruction(state); break;
 
-        case 0x80: UnimplementedInstruction(state); break;
-        case 0x81: UnimplementedInstruction(state); break;
-        case 0x82: UnimplementedInstruction(state); break;
-        case 0x83: UnimplementedInstruction(state); break;
-        case 0x84: UnimplementedInstruction(state); break;
-        case 0x85: UnimplementedInstruction(state); break;
-        case 0x86: UnimplementedInstruction(state); break;
-        case 0x87: UnimplementedInstruction(state); break;
+        case 0x80: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->b; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x81: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->c; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x82: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->d; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x83: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->e; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x84: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->h; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x85: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->l; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x86: { uint16_t ans = (uint16_t) state->a + (uint16_t) /* read from mem*/; ArithFlags(state, ans); state->a = ans & 0xff; } break;
+        case 0x87: { uint16_t ans = (uint16_t) state->a + (uint16_t) state->a; ArithFlags(state, ans); state->a = ans & 0xff; } break;
         case 0x88: UnimplementedInstruction(state); break;
         case 0x89: UnimplementedInstruction(state); break;
         case 0x8a: UnimplementedInstruction(state); break;
